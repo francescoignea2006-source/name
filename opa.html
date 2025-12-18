@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <title>ez</title>
+    <style>
+        .tabella1 table, th, td{
+            color:rgb(0, 0, 0);
+            border:solid 2px rgb(226, 109, 0);
+            margin:0 auto;
+            text-align:center;
+            width:30%;
+            z-index:2;
+        }
+        .immInCasella{
+            background-image: url(negro.jpg);
+            background-size:cover;
+            background-position:center;
+            color:darkred;
+            height:150px;
+            width:150px;
+        }
+        .video{
+            background-image: url(tanjiroVideo.gif);
+            background-size: cover;           /* ridimensiona per riempire */
+            background-position: center;      /* centra l'immagine */
+            background-repeat: no-repeat;
+            width: 100%;                       /* larghezza (regola se necessario) */
+            height: 400px; 
+            z-index:1;
+        }
+    </style>
+</head>
+<body style="background-image: url(thorfinn.jpg); background-repeat:no-repeat;background-size:cover">
+    <h3 style="color:blueviolet">Ciao</h3>
+
+    <div class="tabella1">
+        <table>
+            <tr>
+                <th style="color:chocolate;background-color:rgb(252, 184, 101)">Lunedi'</th>
+                <th style="background:rgb(252, 184, 101);color:chocolate;">Martedi'</th>
+            </tr>
+            <tr>
+                <td rowspan="2" style="color:black;background: linear-gradient(to right, rgb(255,111,15), rgb(255,177,74), rgb(255, 120, 120));">Informatica</td>
+                <td>Italiano</td>
+            </tr>
+            <tr>
+                <td>Storia</td>
+            </tr>
+            <tr>
+                <td class="immInCasella">Diritto</td>
+                <td style="color:white;background:linear-gradient(to right, rgb(55, 0, 255), rgb(162, 0, 255))">Economia</td>
+            </tr>
+        </table>
+    </div>
+
+    <a href="https://r6.tracker.network/">Pagina opa:</a>
+    <button onclick="alert('Hello!')">Click Me</button>
+
+    <div class="video">
+        <!--<img src="tanjiroVideo.gif" alt="video di tanjiro">-->
+    </div>
+
+</body>
+</html>
