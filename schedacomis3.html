@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker Progressioni Allenamento</title>
+    <style>
+        :root {
+            --color-day1: #FF6B6B;
+            --color-day2: #4ECDC4;
+            --color-day3: #FFD93D;
+            --color-day1-light: #FFE5E5;
+            --color-day2-light: #E0F7F6;
+            --color-day3-light: #FFF9E6;
+            --color-text: #333;
+            --color-border: #ddd;
+            --color-bg: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: var(--color-text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--color-text);
+            font-size: 28px;
+        }
+
+        .days-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: white;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tab-btn.day1 {
+            background-color: var(--color-day1);
+        }
+
+        .tab-btn.day2 {
+            background-color: var(--color-day2);
+        }
+
+        .tab-btn.day3 {
+            background-color: var(--color-day3);
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .tab-btn:active {
+            transform: translateY(0);
+        }
+
+        .tab-btn.active {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .day-section {
+            display: none;
+        }
+
+        .day-section.active {
+            display: block;
+        }
+
+        .day-header {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .day-header.day1 {
+            background-color: var(--color-day1);
+        }
+
+        .day-header.day2 {
+            background-color: var(--color-day2);
+        }
+
+        .day-header.day3 {
+            background-color: var(--color-day3);
+        }
+
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 6px solid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .exercise-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .exercise-card.day1 {
+            border-left-color: var(--color-day1);
+            background-color: var(--color-day1-light);
+        }
+
+        .exercise-card.day2 {
+            border-left-color: var(--color-day2);
+            background-color: var(--color-day2-light);
+        }
+
+        .exercise-card.day3 {
+            border-left-color: var(--color-day3);
+            background-color: var(--color-day3-light);
+        }
+
+        .exercise-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: var(--color-text);
+        }
+
+        .exercise-info {
+            display: grid;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            min-width: 90px;
+            color: var(--color-text);
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .week-container {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .week-data {
+            display: grid;
+            gap: 4px;
+            font-size: 13px;
+        }
+
+        .week-item {
+            padding: 6px 8px;
+            background: white;
+            border-radius: 6px;
+            color: #555;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #888;
+            font-style: italic;
+            margin-top: 12px;
+            padding: 8px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 6px;
+            line-height: 1.4;
+        }
+
+        .legend {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: var(--color-text);
+        }
+
+        @media (max-width: 768px) {
+            .exercises-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .days-tabs {
+                justify-content: flex-start;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .tab-btn {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Tracker Progressioni Allenamento</h1>
+
+        <div class="days-tabs">
+            <button class="tab-btn day1 active" data-day="day1">Giorno 1: Petto-Spalle</button>
+            <button class="tab-btn day2" data-day="day2">Giorno 2: Gambe</button>
+            <button class="tab-btn day3" data-day="day3">Giorno 3: Schiena-Braccia</button>
+        </div>
+
+        <div id="day1" class="day-section active">
+            <div class="day-header day1">Giorno 1: Petto-Spalle-Tricipiti</div>
+            <div class="exercises-grid">
+                <div class="exercise-card day1">
+                    <div class="exercise-name">🔥 DIPS</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">Max-4-4-max</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">2:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 7.5kgx max</div>
+                            <div class="week-item"><strong>S2:</strong> 10kgx4</div>
+                            <div class="week-item"><strong>S3:</strong> 10kgx max</div>
+                            <div class="week-item"><strong>S4:</strong> 5kgx max</div>
+                        </div>
+                    </div>
+                    <div class="note">Prima serie corpo libero/elastico massimale. Due serie da 4 colpi con 10kg, ultima a cedimento.</div>
+                </div>
+
+                <div class="exercise-card day1">
+                    <div class="exercise-name">💪 SPINTE SU MULTIPOWER 30°</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">8-10</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 18-26kg</div>
+                            <div class="week-item"><strong>S2:</strong> 20-28kg</div>
+                            <div class="week-item"><strong>S3:</strong> 22-30kg</div>
+                            <div class="week-item"><strong>S4:</strong> 18-24kg</div>
+                        </div>
+                    </div>
+                    <div class="note">Fermo in massima estensione di 2 secondi</div>
+                </div>
+
+                <div class="exercise-card day1">
+                    <div class="exercise-name">🎯 NEGATIVE MUSCLE UPS</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">MAX</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> max</div>
+                            <div class="week-item"><strong>S2:</strong> max+1</div>
+                            <div class="week-item"><strong>S3:</strong> max+2</div>
+                            <div class="week-item"><strong>S4:</strong> max</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day1">
+                    <div class="exercise-name">🏋️ SHOULDER PRESS</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">4-5</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:30</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 42.5-47.5kg</div>
+                            <div class="week-item"><strong>S2:</strong> 45-50kg</div>
+                            <div class="week-item"><strong>S3:</strong> 47.5-52.5kg</div>
+                            <div class="week-item"><strong>S4:</strong> 40-45kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day1">
+                    <div class="exercise-name">✋ CROCI CAVI ALTI</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">10-12</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:10</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 12.5kg</div>
+                            <div class="week-item"><strong>S2:</strong> 15kg</div>
+                            <div class="week-item"><strong>S3:</strong> 15kg</div>
+                            <div class="week-item"><strong>S4:</strong> 12.5kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day1">
+                    <div class="exercise-name">⬇️ PUSH DOWN</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">12-15</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 70-80kg</div>
+                            <div class="week-item"><strong>S2:</strong> 75-85kg</div>
+                            <div class="week-item"><strong>S3:</strong> 80-90kg</div>
+                            <div class="week-item"><strong>S4:</strong> 60-75kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day1">
+                    <div class="exercise-name">🔄 CROCI INVERSE CAVI</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3+drop set</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">6-8</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 25-35kg</div>
+                            <div class="week-item"><strong>S2:</strong> 30-37.5kg +drop</div>
+                            <div class="week-item"><strong>S3:</strong> 35-40kg +drop</div>
+                            <div class="week-item"><strong>S4:</strong> 25-35kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day1">
+                    <div class="exercise-name">💪 PLANK</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Durata:</span><span class="info-value">40"-1'</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 20kg</div>
+                            <div class="week-item"><strong>S2:</strong> 25kg</div>
+                            <div class="week-item"><strong>S3:</strong> 30kg</div>
+                            <div class="week-item"><strong>S4:</strong> 15kg</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="day2" class="day-section">
+            <div class="day-header day2">Giorno 2: Gambe</div>
+            <div class="exercises-grid">
+                <div class="exercise-card day2">
+                    <div class="exercise-name">🦵 RDL</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">6-8</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">2:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 150kg</div>
+                            <div class="week-item"><strong>S2:</strong> 155kg</div>
+                            <div class="week-item"><strong>S3:</strong> 160kg</div>
+                            <div class="week-item"><strong>S4:</strong> 140kg</div>
+                        </div>
+                    </div>
+                    <div class="note">Schiena dritta, stretching femorali. Priorità tecnica.</div>
+                </div>
+
+                <div class="exercise-card day2">
+                    <div class="exercise-name">🏋️ HACK SQUAT</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">8-10</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">2:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 120kg</div>
+                            <div class="week-item"><strong>S2:</strong> 130kg</div>
+                            <div class="week-item"><strong>S3:</strong> 140kg</div>
+                            <div class="week-item"><strong>S4:</strong> 110kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day2">
+                    <div class="exercise-name">⚙️ LEG EXTENSION</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">6-8</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:30</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 45kg</div>
+                            <div class="week-item"><strong>S2:</strong> 50kg</div>
+                            <div class="week-item"><strong>S3:</strong> 55kg</div>
+                            <div class="week-item"><strong>S4:</strong> 40kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day2">
+                    <div class="exercise-name">🔃 LEG CURL STESO</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">7-9</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:20</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 50kg</div>
+                            <div class="week-item"><strong>S2:</strong> 55kg</div>
+                            <div class="week-item"><strong>S3:</strong> 60kg</div>
+                            <div class="week-item"><strong>S4:</strong> 45kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day2">
+                    <div class="exercise-name">🦵 ABDUCTOR</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">8-10</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:20</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 70kg</div>
+                            <div class="week-item"><strong>S2:</strong> 75kg</div>
+                            <div class="week-item"><strong>S3:</strong> 80kg</div>
+                            <div class="week-item"><strong>S4:</strong> 65kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day2">
+                    <div class="exercise-name">🦵 ADDUCTOR</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">8-10</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:20</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 65kg</div>
+                            <div class="week-item"><strong>S2:</strong> 70kg</div>
+                            <div class="week-item"><strong>S3:</strong> 75kg</div>
+                            <div class="week-item"><strong>S4:</strong> 60kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day2">
+                    <div class="exercise-name">🦶 CALF RAISES</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">7-9</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 40kg</div>
+                            <div class="week-item"><strong>S2:</strong> 44kg</div>
+                            <div class="week-item"><strong>S3:</strong> 48kg</div>
+                            <div class="week-item"><strong>S4:</strong> 36kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day2">
+                    <div class="exercise-name">🎯 TUC FRONT</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Tipo:</span><span class="info-value">Isometria massimale</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">2:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> max iso</div>
+                            <div class="week-item"><strong>S2:</strong> max+5s</div>
+                            <div class="week-item"><strong>S3:</strong> max+10s</div>
+                            <div class="week-item"><strong>S4:</strong> max iso</div>
+                        </div>
+                    </div>
+                    <div class="note">Elastico sulla lombare</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="day3" class="day-section">
+            <div class="day-header day3">Giorno 3: Schiena-Braccia-Core</div>
+            <div class="exercises-grid">
+                <div class="exercise-card day3">
+                    <div class="exercise-name">📈 CHIN UP</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">2+2+2</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">2:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 7.5kg</div>
+                            <div class="week-item"><strong>S2:</strong> 10kg</div>
+                            <div class="week-item"><strong>S3:</strong> 10kg</div>
+                            <div class="week-item"><strong>S4:</strong> 5kg</div>
+                        </div>
+                    </div>
+                    <div class="note">Una serie di scapolate + una serie a corpo libero</div>
+                </div>
+
+                <div class="exercise-card day3">
+                    <div class="exercise-name">💪 PANCA SCHOTT</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">4</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">7-9</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:30</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 38kg</div>
+                            <div class="week-item"><strong>S2:</strong> 40kg</div>
+                            <div class="week-item"><strong>S3:</strong> 42kg</div>
+                            <div class="week-item"><strong>S4:</strong> 34kg</div>
+                        </div>
+                    </div>
+                    <div class="note">Bilanciere EZ</div>
+                </div>
+
+                <div class="exercise-card day3">
+                    <div class="exercise-name">🎯 LENTO AVANTI</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">4-5</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 20kg</div>
+                            <div class="week-item"><strong>S2:</strong> 22.5kg</div>
+                            <div class="week-item"><strong>S3:</strong> 25kg</div>
+                            <div class="week-item"><strong>S4:</strong> 17.5kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day3">
+                    <div class="exercise-name">💪 HAMMER CURL</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">8-10</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:10</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 18kg</div>
+                            <div class="week-item"><strong>S2:</strong> 20kg</div>
+                            <div class="week-item"><strong>S3:</strong> 22kg</div>
+                            <div class="week-item"><strong>S4:</strong> 16kg</div>
+                        </div>
+                    </div>
+                    <div class="note">Eccentrica lenta: 3 secondi</div>
+                </div>
+
+                <div class="exercise-card day3">
+                    <div class="exercise-name">✋ W RAISES</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">5</span></div>
+                        <div class="info-row"><span class="info-label">Ripetizioni:</span><span class="info-value">7</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> 5kg</div>
+                            <div class="week-item"><strong>S2:</strong> 6kg</div>
+                            <div class="week-item"><strong>S3:</strong> 7kg</div>
+                            <div class="week-item"><strong>S4:</strong> 4kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card day3">
+                    <div class="exercise-name">🐉 TUC DRAGON FLAG</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Tipo:</span><span class="info-value">MAX</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:30</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> max+1</div>
+                            <div class="week-item"><strong>S2:</strong> max+2</div>
+                            <div class="week-item"><strong>S3:</strong> max+3</div>
+                            <div class="week-item"><strong>S4:</strong> max</div>
+                        </div>
+                    </div>
+                    <div class="note">Pressata</div>
+                </div>
+
+                <div class="exercise-card day3">
+                    <div class="exercise-name">🎯 HOLLOW POSITION</div>
+                    <div class="exercise-info">
+                        <div class="info-row"><span class="info-label">Serie:</span><span class="info-value">3</span></div>
+                        <div class="info-row"><span class="info-label">Tipo:</span><span class="info-value">ISO</span></div>
+                        <div class="info-row"><span class="info-label">Recupero:</span><span class="info-value">1:00</span></div>
+                    </div>
+                    <div class="week-container">
+                        <div class="week-data">
+                            <div class="week-item"><strong>S1:</strong> iso 30s</div>
+                            <div class="week-item"><strong>S2:</strong> iso 40s</div>
+                            <div class="week-item"><strong>S3:</strong> iso 50s</div>
+                            <div class="week-item"><strong>S4:</strong> iso 20s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>📊 Legenda e Note</h3>
+            <div style="margin-top: 15px; padding: 15px; background: rgba(255,107,107,0.1); border-radius: 8px; border-left: 4px solid #FF6B6B;">
+                <strong>💡 Progressione Settimane:</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0; padding-left: 20px; line-height: 1.6;">
+                    <li><strong>S1-S3:</strong> Aumenti graduali 2-5% su pesi e volume</li>
+                    <li><strong>S4 (Deload):</strong> Ridurre carichi al 70-80% per recupero neurale</li>
+                    <li>Se atleta non chiude range: mantieni peso e aggiungi reps</li>
+                    <li>Se RPE &gt; 8: ripeti la stessa settimana</li>
+                    <li>Priorità sempre alla TECNICA su peso assoluto</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const dayId = this.getAttribute('data-day');
+                
+                document.querySelectorAll('.day-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                document.getElementById(dayId).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
